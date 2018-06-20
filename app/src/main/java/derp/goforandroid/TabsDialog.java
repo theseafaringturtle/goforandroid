@@ -52,6 +52,7 @@ public class TabsDialog {
         builderSingle.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                fragment.openDocuments.set(currentTabIndex, fragment.inView.getText().toString());//update in memory copy of the previous file
                 chooseTab(which);
                 currentTabIndex = which;
             }
@@ -62,6 +63,7 @@ public class TabsDialog {
         dialog.show();
     }
     void removeTab(int pos){
+        TabsDialog.unsavedTabs.remove(Integer.valueOf(pos));
         if(currentTabIndex == pos){
             if(currentTabIndex>0) {
                 chooseTab(currentTabIndex - 1);
@@ -71,10 +73,12 @@ public class TabsDialog {
                 chooseTab(currentTabIndex + 1);
             }
         }
+        if(pos < currentTabIndex)
+            currentTabIndex -=1;
         tabsList.remove(pos);
         EditFragment.openDocuments.remove(pos);
         arrayAdapter.notifyDataSetChanged();
-        if(EditFragment.openDocuments.size()==0){
+        if(EditFragment.openDocuments.size()==0){//no more open tabs, switch to files tab
             activity.pager.setPagingEnabled(false);
             dialog.dismiss();
             ((TabLayout)activity.findViewById(R.id.sliding_tabs)).getTabAt(0).select();
@@ -84,7 +88,11 @@ public class TabsDialog {
     }
     void chooseTab(int which){
         String strName = arrayAdapter.getItem(which);
-        ((Button)activity.findViewById(R.id.openTabButton)).setText(strName);
+        Button openTabButton = ((Button)activity.findViewById(R.id.openTabButton));
+        if( unsavedTabs.contains(which))
+            openTabButton.setText(strName+"*");
+        else
+            openTabButton.setText(strName);
         fragment.inView.removeTextChangedListener(fragment.inView.watcher);
         fragment.inView.setText(fragment.openDocuments.get(which));
         fragment.inView.post(new Runnable() {//todo refactor

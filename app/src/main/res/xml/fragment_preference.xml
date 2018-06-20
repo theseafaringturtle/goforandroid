@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="Editor">
+
+        <CheckBoxPreference
+            android:key="lineNumbers"
+            android:title="Line numbers"
+            android:summary="Show line numbers on the left hand side of the editor"
+            android:defaultValue="@bool/lineNumbers"/>
+        <CheckBoxPreference
+            android:key="highlightLine"
+            android:title="Highlight line"
+            android:summary="Highlight currently selected line in the editor"
+            android:defaultValue="@bool/highlightLine"/>
+        <ListPreference
+            android:key="fontSize"
+            android:title="Text Size"
+            android:summary=""
+            android:entries="@array/tsizelistentries"
+            android:entryValues="@array/tsizelistvalues"
+            android:defaultValue="@string/fontSize"
+            />
+        <ListPreference
+            android:key="syntaxHighlighting"
+            android:title="Syntax Highlighting"
+            android:summary=""
+            android:entries="@array/synhlistentries"
+            android:entryValues="@array/synhlistentries"
+            android:defaultValue="@string/syntaxHighlighting"
+            />
+        <CheckBoxPreference
+            android:key="autoComplete"
+            android:title="Autocomplete"
+            android:summary=""
+            android:defaultValue="@bool/autoComplete"/>
+
+
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="Extra">
+    <Preference android:title="Help"
+        android:key="faq"
+        android:summary=""/>
+    </PreferenceCategory>
+</PreferenceScreen>

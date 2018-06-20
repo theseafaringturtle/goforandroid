@@ -4,11 +4,14 @@ import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+import android.provider.OpenableColumns;
 import android.support.design.widget.TabItem;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -20,16 +23,13 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.AttributeSet;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.RadioGroup;
-import android.widget.ToggleButton;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements InstallFragment.O
     String lastFilePath = "";
 
     private static final int WRITE_EXT_STORAGE_REQUEST = 0;
+    //GDrive drive;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements InstallFragment.O
             pageAdapter.fragments.add(pageAdapter.fragments.size(), InstallFragment.newInstance(false));
             pageAdapter.notifyDataSetChanged();
             pager.setCurrentItem(3);
+            pager.setPagingEnabled(false);
 
         } else {
             installFinished();
@@ -95,14 +97,43 @@ public class MainActivity extends AppCompatActivity implements InstallFragment.O
                 startActivityForResult(intent, 0);
             }
         });
+        //drive = new GDrive(this);
+    }
+
+    public String getFileNameFromUri(Uri uri) {//https://stackoverflow.com/a/25005243
+        String result = null;
+        if (uri.getScheme().equals("content")) {
+            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+        if (result == null) {
+            result = uri.getPath();
+            int cut = result.lastIndexOf('/');
+            if (cut != -1) {
+                result = result.substring(cut + 1);
+            }
+        }
+        return result;
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == 0) {
-            updateUserPrefs();
+        switch(requestCode){
+            case 0:
+                updateUserPrefs();
+                break;
+            case 123:
+                if(data==null) return;
+                Uri uri = data.getData();
+                if(pager.getCurrentItem()!=0) return;
+                ((FoldersFragment)pageAdapter.getItem(0)).importFileFromUri(uri);
         }
     }
 
@@ -110,7 +141,7 @@ public class MainActivity extends AppCompatActivity implements InstallFragment.O
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         String fsize = sharedPrefs.getString("fontSize", "18");
         EditFragment.fontSize = Integer.parseInt(fsize);
-        EditCode.highlightLine = sharedPrefs.getBoolean("highlightLine", true);
+        EditCode.highlightLine = sharedPrefs.getBoolean("highlightLine", false);
         EditCode.drawLineNums = sharedPrefs.getBoolean("lineNumbers", true);
         EditCode.autoComplete = sharedPrefs.getBoolean("autoComplete", true);
         PrettifyHighlighter.syntaxHighlighting = sharedPrefs.getString("syntaxHighlighting", "Simple");
@@ -158,9 +189,12 @@ public class MainActivity extends AppCompatActivity implements InstallFragment.O
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    protected void onResume() {
+        super.onResume();
+        //drive.initClient();
     }
+
+
 
     @Override
     public void onStop() {
@@ -170,21 +204,37 @@ public class MainActivity extends AppCompatActivity implements InstallFragment.O
         editor.putString("lastFile", currentFilePath);
         editor.putString("lastFolder", currentFolderPath);
         editor.commit();
+        //drive.stopClient();
     }
 
     @Override
     public void onBackPressed() {
         if (pager.getCurrentItem() == 0) {
             FoldersFragment frag = (FoldersFragment) pageAdapter.fragments.get(0);
-            if (!(frag.currentPath + File.separator).equals(mDirs.GOPATH.toString())) {
+            if (frag.currentPath!=null && !(frag.currentPath + File.separator).equals(mDirs.GOPATH.toString())) {//frag.currentPath!=null fix for reported crash
                 frag.updateFiles(frag.currentPath.getParentFile());
                 return;
             }
         }
-        finish();
+        if(TabsDialog.unsavedTabs.size()>0){
+            new AlertDialog.Builder(this)
+                    .setTitle("Confirm")
+                    .setMessage("Some files have not been saved, are you sure you want to quit?")
+                    .setPositiveButton("Quit", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            finish();
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                        }
+                    })
+                    .show();
+        }
+        else {
+            finish();
+        }
     }
-
-    ;
 
     public void installFinished() {
         //(findViewById(R.id.tabItem3)).performClick();
@@ -205,6 +255,7 @@ public class MainActivity extends AppCompatActivity implements InstallFragment.O
         } else
             ((TabLayout) findViewById(R.id.sliding_tabs)).getTabAt(0).select();
         //pager.setCurrentItem(1,true);
+        pager.setPagingEnabled(true);
     }
 
     void deleteTempFiles() {

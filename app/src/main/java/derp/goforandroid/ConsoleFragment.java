@@ -86,16 +86,23 @@ public class ConsoleFragment extends Fragment {
         outputView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                String[] options = {"Copy all"};
+                String[] options = {"Copy all","Stop"};
                 AlertDialog.Builder builder = new AlertDialog.Builder(activity);
                 builder.setTitle("Action");
                 builder.setItems(options, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(CLIPBOARD_SERVICE);
-                        ClipData clip = ClipData.newPlainText("GoConsole", outputView.getText().toString());
-                        clipboard.setPrimaryClip(clip);
-                        Toast.makeText(activity,"Console output copied to clipboard",Toast.LENGTH_SHORT).show();
+                        switch (which) {
+                            case 0:
+                                ClipboardManager clipboard = (ClipboardManager) activity.getSystemService(CLIPBOARD_SERVICE);
+                                ClipData clip = ClipData.newPlainText("GoConsole", outputView.getText().toString());
+                                clipboard.setPrimaryClip(clip);
+                                Toast.makeText(activity, "Console output copied to clipboard", Toast.LENGTH_SHORT).show();
+                                break;
+                            case 1:
+                                stopProcess();
+                                break;
+                        }
                     }
                 });
                 builder.show();

@@ -1,0 +1,56 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="derp.goforandroid.ConsoleFragment">
+
+    <ScrollView
+        android:id="@+id/outputScroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:isScrollContainer="false">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/outputView"
+                android:textIsSelectable="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rect1"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:text="--Input/Output--\n"
+                android:textColor="@android:color/white"
+                app:backgroundTint="#CC000044"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:clickable="true"
+                android:longClickable="true"/>
+
+            <EditText
+                android:id="@+id/consoleInput"
+                android:imeOptions="actionGo"
+                android:enabled="false"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/outputView"
+                android:background="@drawable/rect1"
+                android:gravity="top|left"
+                android:inputType="textNoSuggestions"
+                android:textColor="@android:color/white"
+                android:textColorHint="@android:color/white"
+                app:backgroundTint="#CC000044"
+                android:paddingBottom="5dp"/>
+        </RelativeLayout>
+
+    </ScrollView>
+
+</FrameLayout>

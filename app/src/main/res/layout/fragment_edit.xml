@@ -1,0 +1,112 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="derp.goforandroid.EditFragment">
+
+    <RelativeLayout
+        android:id="@+id/editRoot"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:id="@+id/editCmdBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+
+            <Button
+                android:id="@+id/saveButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_toLeftOf="@+id/runButton"
+                android:layout_toStartOf="@+id/runButton"
+                android:drawableLeft="@android:drawable/ic_menu_save"
+                android:minWidth="0dp"
+                android:textColor="@android:color/white"
+                app:backgroundTint="?attr/colorPrimaryDark" />
+
+            <Button
+                android:id="@+id/openTabButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/saveButton"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_toLeftOf="@+id/toolsButton"
+                android:layout_toStartOf="@+id/toolsButton"
+                android:drawableRight="@drawable/ic_arrow_drop_down"
+                android:ellipsize="start"
+                android:singleLine="true"
+                android:text="    "
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                app:backgroundTint="?attr/colorPrimaryDark" />
+
+            <Button
+                android:id="@+id/toolsButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_toLeftOf="@+id/saveButton"
+                android:layout_toStartOf="@+id/saveButton"
+                android:drawableLeft="@android:drawable/ic_menu_edit"
+                android:minWidth="0dp"
+                android:textColor="@android:color/white"
+                app:backgroundTint="?attr/colorPrimaryDark" />
+
+            <Button
+                android:id="@+id/runButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:drawableLeft="@android:drawable/ic_media_play"
+                android:text="Run"
+                android:textColor="@android:color/white"
+                app:backgroundTint="?attr/colorPrimaryDark" />
+
+
+        </RelativeLayout>
+
+        <derp.goforandroid.EditCode
+            android:id="@+id/inputView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/keyButtonRowScroller"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/editCmdBar"
+            android:gravity="top|left"
+            android:hint=""
+            android:inputType="textMultiLine|textNoSuggestions"
+            android:scrollbarStyle="insideOverlay"
+            android:scrollbars="vertical"
+            android:textSize="16sp"
+            app:backgroundTint="#00000000" />
+
+
+        <HorizontalScrollView
+            android:id="@+id/keyButtonRowScroller"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true">
+
+            <LinearLayout
+                android:id="@+id/keyButtonRow"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+            </LinearLayout>
+        </HorizontalScrollView>
+
+    </RelativeLayout>
+
+</FrameLayout>

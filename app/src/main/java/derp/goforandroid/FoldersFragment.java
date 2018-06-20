@@ -96,8 +96,33 @@ public class FoldersFragment extends Fragment {
                 chooseNew();
             }
         });
+        activity.findViewById(R.id.importButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                importNew();
+            }
+        });
         setRetainInstance(true);
     }
+    void importNew(){
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        String strType = "*/*";
+        intent.setDataAndType(Uri.parse(currentPath.getAbsolutePath()), strType);
+        activity.startActivityForResult(intent, 123);
+    }
+    void importFileFromUri(Uri uri){
+        String destPath = currentPath + File.separator + activity.getFileNameFromUri(uri);
+        try {
+            InputStream in = activity.getContentResolver().openInputStream(uri);
+            OutputStream out = new FileOutputStream(destPath);
+            Utils.copyFile(in, out);
+            updateFiles(currentPath);
+        }catch(Exception ex){
+            activity.showError("Could not import file",ex.toString(),false);
+            ex.printStackTrace();
+        }
+    }
+
     void chooseNew(){
         if((currentPath+File.separator).equals(mDirs.GOPATH))
             return;
@@ -468,6 +493,16 @@ public class FoldersFragment extends Fragment {
         return ((EditFragment) activity.pageAdapter.getItem(1));
     }
 
+    private void removeCorrespondingTab(String path) {
+        for(int i=0;i<TabsDialog.tabsList.size();i++){
+            String s = TabsDialog.tabsList.get(i);
+            if (s.endsWith("*"))
+                s = s.substring(0, s.length() - 1);
+            if( mDirs.getRelativePath(path).equals(s)){
+                EditFragment.tabsDialog.removeTab(i);
+            }
+        }
+    }
 
     private void deleteRecursive(File fileOrDirectory) {//http://stackoverflow.com/a/6425744
         if (fileOrDirectory.isDirectory())
@@ -477,8 +512,10 @@ public class FoldersFragment extends Fragment {
     }
 
     private void deleteFileDialog(final File path){
-        if((path.getParentFile().getAbsolutePath()+File.separator).equals(mDirs.GOPATH) || path.toString().equals(mDirs.binDir+"gocode"))
-            Toast.makeText(activity,"You cannot remove this file",Toast.LENGTH_SHORT).show();
+        if((path.getParentFile().getAbsolutePath()+File.separator).equals(mDirs.GOPATH) || path.toString().equals(mDirs.binDir+"gocode")) {
+            Toast.makeText(activity, "You cannot remove this file", Toast.LENGTH_SHORT).show();
+            return;
+        }
         String msg = "Are you sure you want to delete this ";
         if(path.isDirectory())
             msg+="folder?";
@@ -490,6 +527,7 @@ public class FoldersFragment extends Fragment {
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         deleteRecursive(path);
+                        removeCorrespondingTab(path.toString());
                         updateFiles(currentPath);
                     }
                 })
@@ -506,7 +544,8 @@ public class FoldersFragment extends Fragment {
         if (path.exists()) {
             if (!(path.getParentFile().getAbsolutePath()+File.separator).equals(mDirs.filesDir)) {
                 r.add("..");
-                activity.findViewById(R.id.newButton).setVisibility(View.VISIBLE);
+                if(!path.toString().startsWith(mDirs.binDir.substring(0,mDirs.binDir.length()-1)))
+                    activity.findViewById(R.id.newButton).setVisibility(View.VISIBLE);
             }
             else{
                 activity.findViewById(R.id.newButton).setVisibility(View.INVISIBLE);

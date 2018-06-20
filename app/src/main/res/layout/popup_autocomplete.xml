@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="144dp"
+    android:layout_width="wrap_content"
+    android:background="@drawable/nopad_editbutton"
+
+    >
+    <derp.goforandroid.ACScrollView
+        android:id="@+id/floatingACScroller"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="visible">
+        <LinearLayout
+            android:id="@+id/floatingACMenu"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:maxHeight="28dp"
+            android:layout_height="wrap_content">
+
+            <derp.goforandroid.ACButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Undo"
+                />
+
+            <derp.goforandroid.ACButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Redo"
+
+                />
+
+            <derp.goforandroid.ACButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Search"
+                />
+
+            <derp.goforandroid.ACButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Jump to"
+                />
+
+
+        </LinearLayout>
+
+    </derp.goforandroid.ACScrollView>
+</LinearLayout>

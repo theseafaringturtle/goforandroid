@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/floatingEditMenu"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@id/editCmdBar"
+    android:visibility="visible">
+
+    <Button
+    android:id="@+id/undoButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Undo"
+    android:textColor="@android:color/white"
+    android:background="@drawable/nopad_editbutton"
+    android:drawableLeft="@drawable/ic_action_undo"/>
+
+    <Button
+    android:id="@+id/redoButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@+id/undoButton"
+    android:text="Redo"
+    android:textColor="@android:color/white"
+    android:background="@drawable/nopad_editbutton"
+    android:drawableLeft="@drawable/ic_action_redo"
+    />
+
+    <Button
+    android:id="@+id/searchButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@+id/redoButton"
+    android:text="Search"
+    android:textColor="@android:color/white"
+    android:background="@drawable/nopad_editbutton"
+    android:drawableLeft="@android:drawable/ic_menu_search"/>
+
+    <Button
+        android:id="@+id/gotoButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/searchButton"
+        android:text="Jump to"
+        android:textColor="@android:color/white"
+        android:background="@drawable/nopad_editbutton"
+        android:drawableLeft="@drawable/ic_format_list_numbered"/>
+
+
+</RelativeLayout>

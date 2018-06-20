@@ -10,6 +10,7 @@ import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.AppCompatButton;
+import android.text.InputType;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -79,6 +80,7 @@ public class EditFragment extends Fragment {
         activity =(MainActivity) view.getContext(); //getActivity();
         mDirs = activity.mDirs;
         inView = (EditCode) activity.findViewById(R.id.inputView);
+        //inView.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
         inView.setTextSize(fontSize);
 
         if(!activity.lastFilePath.equals("") && new File(activity.lastFilePath).exists()) {
@@ -290,9 +292,28 @@ public class EditFragment extends Fragment {
             new File(mDirs.binDir+packageName).renameTo(new File(mDirs.binDir+"examples"+File.separator+packageName));//move bin to examples subdir
             command[0]=mDirs.binDir+"examples"+File.separator+packageName;
         }
-        /*ConsoleFragment.command=command;
-        ConsoleFragment.envVars=envVars;
-        ConsoleFragment.wDir=wDir;*/
+        else{//test
+            if(!new File(mDirs.binDir+"_"+packageName+File.separator).exists())//underscore?
+                new File(mDirs.binDir+"_"+packageName+File.separator).mkdir();
+            if(new File(mDirs.binDir+packageName).renameTo(new File(mDirs.binDir+"_"+packageName+File.separator+packageName)))
+                command[0] = mDirs.binDir + "_" + packageName + File.separator + packageName;
+        }
+        /*
+        if(mDirs.getPackageName(currentPath).startsWith("examples")){
+            if(!new File(mDirs.binDir+"examples").exists())
+                new File(mDirs.binDir+"examples").mkdir();
+            if(!new File(mDirs.binDir+"examples"+File.separator+packageName).exists())
+                new File(mDirs.binDir+"examples"+File.separator+packageName).mkdir();
+            if(new File(mDirs.binDir+packageName).renameTo(new File(mDirs.binDir+"examples"+File.separator+packageName+File.separator+packageName)))//move bin to examples subdir
+                command[0]=mDirs.binDir+"examples"+File.separator+packageName;
+        }
+        else{//test
+            if(!new File(mDirs.binDir+"_"+packageName+File.separator).exists())//underscore?
+                new File(mDirs.binDir+"_"+packageName+File.separator).mkdir();
+            if(new File(mDirs.binDir+packageName).renameTo(new File(mDirs.binDir+"_"+packageName+File.separator+packageName)))
+                command[0] = mDirs.binDir + "_" + packageName + File.separator + packageName;
+        }f
+        */
         ConsoleFragment con = getConsoleFragment();
         con.stopProcess();
         con.activity=activity;
@@ -394,7 +415,7 @@ public class EditFragment extends Fragment {
         this.mDirs = activity.mDirs;
         currentPath = path;
         File file = new File(path);
-        if(file.length()>1024*1024*2){//todo test
+        if(file.length()>1024*1024*2){
             throw new IOException("File size is too large (>2MB)");
         }
         FileInputStream inputStream = new FileInputStream(file);

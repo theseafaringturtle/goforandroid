@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:drawable/screen_background_dark_transparent"
+    android:backgroundTint="@android:color/holo_blue_light"
+    android:orientation="vertical"
+    tools:context="derp.goforandroid.MainActivity">
+
+    <ImageButton
+        android:id="@+id/settingsButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/viewpager"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:background="@android:color/transparent"
+        android:backgroundTint="?attr/colorPrimaryDark"
+        android:minWidth="48dp"
+        android:src="@drawable/ic_settings"
+        android:textColor="@android:color/white" />
+    <android.support.design.widget.TabLayout
+        android:id="@+id/sliding_tabs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:tabGravity="fill"
+        app:tabMaxWidth="0dp"
+        app:tabMode="fixed"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_toLeftOf="@+id/settingsButton">
+
+        <android.support.design.widget.TabItem
+            android:id="@+id/tabItem"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Files" />
+
+        <android.support.design.widget.TabItem
+            android:id="@+id/tabItem2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Editor" />
+
+        <android.support.design.widget.TabItem
+            android:id="@+id/tabItem3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Console" />
+
+    </android.support.design.widget.TabLayout>
+    <!--<LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <RadioGroup
+            android:id="@+id/navGroup"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal" >
+
+        <ToggleButton
+            android:id="@+id/toggleButton3"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="ToggleButton"
+            android:onClick="onToggle"
+            app:backgroundTint="#e6d924"
+            android:backgroundTint="#e6d924"
+            android:textOff="First"
+            android:textOn="First" />
+
+        <ToggleButton
+            android:id="@+id/toggleButton2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            app:backgroundTint="#e6d924"
+            android:backgroundTint="#e6d924"
+            android:text="ToggleButton"
+            android:onClick="onToggle"
+            android:textOff="Second"
+            android:textOn="Second" />
+
+        <ToggleButton
+            android:id="@+id/thirdButton"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            app:backgroundTint="#e6d924"
+            android:backgroundTint="#e6d924"
+            android:text="ToggleButton"
+            android:onClick="onToggle"
+            android:textOff="Third"
+            android:textOn="Third" />
+        </RadioGroup>
+    </LinearLayout> -->
+    <!--
+    <FrameLayout
+
+        android:id="@+id/frag_holder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_weight="0.12">
+
+    </FrameLayout> -->
+    <derp.goforandroid.CustomViewPager
+        android:id="@+id/viewpager"
+        android:layout_below="@+id/sliding_tabs"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</RelativeLayout>
+

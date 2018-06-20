@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="lineNumbers">true</bool>
+    <bool name="highlightLine">false</bool>
+    <string name="fontSize">16</string>
+    <string name="syntaxHighlighting">Simple</string>
+    <bool name="autoComplete">true</bool>
+</resources>

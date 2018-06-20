@@ -1,0 +1,47 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.0"
+    defaultConfig {
+        applicationId "derp.goforandroid"
+        minSdkVersion 16
+        targetSdkVersion 25
+        versionCode 3
+        versionName "0.2.1"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+ext {
+    supportLibVersion = '25.3.1'  // variable that can be referenced to keep support libs consistent
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    //compile "com.android.support:appcompat-v7:${supportLibVersion}"
+    compile "com.android.support:design:${supportLibVersion}"
+    compile "com.android.support:appcompat-v7:${supportLibVersion}"
+    compile "com.android.support:support-v4:${supportLibVersion}"
+
+    compile files('libs/Prettify.jar')
+    //compile 'com.github.softwee:codeview-android:1.2.0'
+    compile "com.android.support:support-v4:${supportLibVersion}"
+
+    //compile 'com.dropbox.core:dropbox-core-sdk:2.0.1'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile 'com.google.android.gms:play-services-drive:10.2.6'
+    testCompile 'junit:junit:4.12'
+}
+/*packagingOptions {
+    pickFirst  'META-INF/LICENSE'
+}*/

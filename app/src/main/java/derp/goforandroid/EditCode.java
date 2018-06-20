@@ -75,6 +75,7 @@ public class EditCode extends AppCompatEditText {
                 setTabUnsaved();
             }
         };
+        setHorizontallyScrolling(true);
         /*this.post(new Runnable() {//don't fire on orientation change
             @Override
             public void run() {
@@ -118,7 +119,9 @@ public class EditCode extends AppCompatEditText {
     void setTabUnsaved(){
         if(!TabsDialog.unsavedTabs.contains(TabsDialog.currentTabIndex)) {
             TabsDialog.unsavedTabs.add(TabsDialog.currentTabIndex);
-            ((Button) activity.findViewById(R.id.openTabButton)).append("*");
+            Button openTabButton = ((Button) activity.findViewById(R.id.openTabButton));
+            //((Button) activity.findViewById(R.id.openTabButton)).append("*");
+            openTabButton.setText(openTabButton.getText()+"*");
         }
     }
 
@@ -271,8 +274,8 @@ public class EditCode extends AppCompatEditText {
         measure(0,0);
         curLineRect.right = Math.max(getMeasuredWidth(),getWidth());//getWidth();
         curLineRect.bottom = curLine*getLineHeight()+getLineHeight();
-        setHorizontallyScrolling(true);
-        setMovementMethod(new ScrollingMovementMethod());
+        //setHorizontallyScrolling(true);
+        //setMovementMethod(new ScrollingMovementMethod());
         super.onSelectionChanged(selStart,selEnd);
     }
     @Override

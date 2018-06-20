@@ -154,9 +154,9 @@ public class InstallFragment extends Fragment {
             File g = new File(mDirs.GOPATH);
             if (!g.exists()) {
                 if (g.mkdir()) {
-                    if (new File(mDirs.srcDir + "test").mkdirs()) {
-                        InputStream in = activity.getAssets().open("test.go");
-                        OutputStream out = new FileOutputStream(new File(mDirs.srcDir + "test" + File.separator + "test.go"));
+                    if (new File(mDirs.srcDir + "welcome").mkdirs()) {
+                        InputStream in = activity.getAssets().open("welcome.go");
+                        OutputStream out = new FileOutputStream(new File(mDirs.srcDir + "welcome" + File.separator + "welcome.go"));
                         Utils.copyFile(in, out);
                     }
                     if (new File(mDirs.binDir).mkdirs()) {
@@ -191,14 +191,16 @@ public class InstallFragment extends Fragment {
             createOtherPaths();
             setupExamples();
             //String command = "GOROOT="+GOROOT+" GOPATH="+GOPATH+" "+filesDir+compFolder+File.separator+"bin"+File.separator+"go build test";
-            String[] command = {//todo change
+            String[] command = {
                     mDirs.goExePath+"go",
                     "install",//"build", http://stackoverflow.com/a/25138487
-                    "test"
+                    "welcome"
             };
             HashMap<String,String> envVars = new HashMap<>();
             envVars.put("GOROOT",mDirs.GOROOT);
             envVars.put("GOPATH",mDirs.GOPATH);
+            envVars.put("TMPDIR",mDirs.filesDir+"tmp");
+            envVars.put("CGO_ENABLED","0");
             String wDir = mDirs.goExePath;
             final String out = Utils.executeCommand(command,envVars,wDir);
             if(out.length()<8){
