@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
@@ -28,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.CyclicBarrier;
 
@@ -55,8 +57,10 @@ public class ConsoleFragment extends Fragment {
     static String wDir = null;*/
 
     View rootView;
+    EditText argsView;
     TextView outputView;
     EditText consoleInputView;
+    Button consoleRunButton;
     MainActivity activity;
     static Runnable myRunnable = null;
     static BufferedReader terminalIn;
@@ -65,7 +69,6 @@ public class ConsoleFragment extends Fragment {
     static Thread runThread;
     static final CyclicBarrier barrier = new CyclicBarrier(2);
 
-    private OnFragmentInteractionListener mListener;
 
     public ConsoleFragment() {
         // Required empty public constructor
@@ -74,8 +77,10 @@ public class ConsoleFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState){
         rootView = view;
         activity = (MainActivity) getActivity();
+        argsView = (EditText) activity.findViewById(R.id.cmdArgs);
         outputView = (TextView) activity.findViewById(R.id.outputView);
         consoleInputView = (EditText) activity.findViewById(R.id.consoleInput);
+        //consoleRunButton = (Button) activity.findViewById(R.id.consoleRunButton);
 
         outputView.post(new Runnable() {
             @Override
@@ -133,10 +138,28 @@ public class ConsoleFragment extends Fragment {
                 return false;
             }
         });
+        /*consoleRunButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!EditFragment.noTabs) {
+                    ArrayList command = new ArrayList<String>();
+                    command.add(activity.mDirs.binDir + activity.mDirs.getPackageName(EditFragment.currentPath));
+                    HashMap<String,String> envVars = new HashMap<>();
+                    envVars.put("TMPDIR",activity.mDirs.filesDir+"tmp");
+                    String packageDir = activity.mDirs.srcDir+activity.mDirs.getPackageName(EditFragment.currentPath);
+                    executeWithInput(command, envVars, packageDir);
+                }
+            }
+        });*/
         setRetainInstance(true);
     }
 
-    public void executeWithInput(final String[] command, final HashMap envVars, final String workingDir){
+    public void executeWithInput(final ArrayList<String> command, final HashMap envVars, final String workingDir){
+        if(argsView != null) {
+            for (String arg : argsView.getText().toString().split(" ")) {
+                command.add(arg);
+            }
+        }
         myRunnable = new Runnable(){//fragment leak? http://webcache.googleusercontent.com/a/3039718
             @Override
             public void run() {
@@ -258,21 +281,10 @@ public class ConsoleFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_console, container, false);
     }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
     }
 
     /**

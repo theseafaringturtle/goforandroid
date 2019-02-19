@@ -31,6 +31,8 @@ public class Decompress {
             unzip(stream, destination);
             return true;
         } catch (IOException e) {
+            String t = e.getMessage();
+            Log.e("GO",t);
             e.printStackTrace();
             return false;
         }

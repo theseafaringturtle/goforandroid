@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.HorizontalScrollView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -33,9 +34,9 @@ public class EditCode extends AppCompatEditText {
 
     MainActivity activity;
     TextWatcher watcher;
-    private Rect lineNumRect;
+    //private Rect lineNumRect;
     Paint lineNumPaint;
-    PrettifyHighlighter highlighter = new PrettifyHighlighter();
+    PrettifyHighlighter highlighter;
     Rect curLineRect;
     int curLine;
     Paint curLinePaint;
@@ -53,9 +54,10 @@ public class EditCode extends AppCompatEditText {
 
     public EditCode(Context context, AttributeSet attrs) {
         super(context, attrs);
+        highlighter = new PrettifyHighlighter(this);
         if(!isInEditMode())
             activity = (MainActivity)context;
-        watcher = new TextWatcher() {
+        watcher = new TextWatcher() {//TODO slow when working on large files with extended options, find bottleneck
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 historyAdd(s,start,count);
@@ -69,7 +71,8 @@ public class EditCode extends AppCompatEditText {
             @Override
             public void afterTextChanged(Editable s) {
                 String code = s.toString();
-                highlighter.highlight(s,code);
+                removeCallbacks(highlighter.highlightRunnable);
+                postDelayed(highlighter.highlightRunnable,400);
                 padLineNums();
                 startAutoComplete(code);
                 setTabUnsaved();
@@ -93,12 +96,16 @@ public class EditCode extends AppCompatEditText {
             }
         };
 
-        lineNumRect = new Rect();
+        //lineNumRect = new Rect();
         setPadding((int)getTextSize(),0,0,0);
         lineNumPaint = new Paint();
         lineNumPaint.setStyle(Paint.Style.FILL);
         lineNumPaint.setColor(Color.BLACK);
         lineNumPaint.setTextSize(this.getTextSize());
+        //todo keep showing line nums after scroll?
+        /*int currentX = 0;
+        if(getParent()!= null)
+            currentX = ((HorizontalScrollView)getParent()).getScrollX();*/
         curLineRect = new Rect(0,0,getWidth(),0);
         curLinePaint = new Paint();
         curLinePaint.setStyle(Paint.Style.FILL);
@@ -154,7 +161,7 @@ public class EditCode extends AppCompatEditText {
             setSelection(change.start + change.newS.length());
             bringPointIntoView(change.start+change.oldS.length());
         }
-        highlighter.highlight(getEditableText(),getText().toString());
+        highlighter.highlight();
         //currentZipper = new ArrayList<TextChange>();
     }
     void historyBack(){
@@ -177,7 +184,7 @@ public class EditCode extends AppCompatEditText {
         }
         historyIndex--;
         currentZipper = new ArrayList<TextChange>();
-        highlighter.highlight(getEditableText(),getText().toString());
+        highlighter.highlight();
     }
     public void searchDialog(){
         final EditText txtInput = new EditText(activity);
@@ -254,16 +261,9 @@ public class EditCode extends AppCompatEditText {
         dialog.show();
     }
     public void gotoLine(String lineNum){
-        /*int num = Math.max(0,Integer.parseInt(lineNum)-1);
-        if(num>getLineCount()){
-            num=getLineCount();
-        }
-        final int offset =getLayout().getLineEnd( num );
-        setSelection(offset);*/
         int line = Math.max(0,Integer.parseInt(lineNum)-1);
         line = Math.max(0, Math.min(line - 1, getLineCount() - 1));
         setSelection(getLayout().getLineEnd(line));
-        //bringPointIntoView(offset);
     }
 
     @Override
@@ -283,7 +283,7 @@ public class EditCode extends AppCompatEditText {
         if(drawLineNums) {
             int baseline = getBaseline();
             for (int i = 0; i < getLineCount(); i++) {
-                canvas.drawText("" + (i + 1), lineNumRect.left, baseline, lineNumPaint);
+                canvas.drawText("" + (i + 1), 0, baseline, lineNumPaint);
                 baseline += getLineHeight();
             }
         }
@@ -307,9 +307,7 @@ public class EditCode extends AppCompatEditText {
             setPadding((int)getTextSize()*2,0,0,0);
         }
     }
-    public void findNext(String input){
 
-    }
 }
 class TextChange{
     int start;
@@ -348,18 +346,3 @@ class TextChange{
         finally{
             reader.close();
         }*/
-
-        /*@Override
-    protected void onScrollChanged(int x,int y,int oldx,int oldy){
-        super.onScrollChanged(x,y,oldx,oldy);
-        final int yy = y;
-        if(activity!=null) {
-            //activity.findViewById(R.id.lineNums).scrollTo(0, y);
-            activity.findViewById(R.id.lineNums).post(new Runnable() {
-                @Override
-                public void run() {
-                    activity.findViewById(R.id.lineNums).scrollTo(0, yy);//test
-                }
-            });
-        }
-    }*/

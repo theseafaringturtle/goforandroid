@@ -1,16 +1,58 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="derp.goforandroid.ConsoleFragment">
 
+    <RelativeLayout
+        android:id="@+id/cmdBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:background="@drawable/rect1"
+        android:backgroundTint="#CC000044"
+        >
+        <EditText
+            android:id="@+id/cmdArgs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:hint="Command line arguments..."
+            android:background="@drawable/rect1"
+            app:backgroundTint="#00000000"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
+            android:textSize="16sp"
+            android:selectAllOnFocus="false"
+            android:singleLine="true"
+            android:textColorHint="#bbffffff"
+            android:textColor="@android:color/white"
+            android:inputType="textNoSuggestions|textPersonName"
+             />
+        <!--<Button
+            android:id="@+id/consoleRunButton"
+            android:layout_width="30sp"
+            android:layout_height="30sp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:background="#00000000"
+            android:drawableRight="@android:drawable/ic_media_play"
+            android:textColor="@android:color/white"
+            />-->
+    </RelativeLayout>
+
     <ScrollView
         android:id="@+id/outputScroll"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:fillViewport="true"
-        android:isScrollContainer="false">
+        android:isScrollContainer="false"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@id/cmdBar">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -53,4 +95,4 @@
 
     </ScrollView>
 
-</FrameLayout>
+</RelativeLayout>

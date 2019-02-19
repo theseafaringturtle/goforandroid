@@ -36,7 +36,7 @@ import java.util.List;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
-public class MainActivity extends AppCompatActivity implements InstallFragment.OnFragmentInteractionListener, EditFragment.OnFragmentInteractionListener, FoldersFragment.OnFragmentInteractionListener, ConsoleFragment.OnFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity {
 
     String GO = "Go";
     String SETTINGS = "GoSettings";
@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements InstallFragment.O
         deleteTempFiles();
         updateUserPrefs();
 
-        fList.add(FoldersFragment.newInstance("", ""));
+        fList.add(FoldersFragment.newInstance());
         fList.add(EditFragment.newInstance(false));
         fList.add(ConsoleFragment.newInstance(false));
 
@@ -132,8 +132,8 @@ public class MainActivity extends AppCompatActivity implements InstallFragment.O
             case 123:
                 if(data==null) return;
                 Uri uri = data.getData();
-                if(pager.getCurrentItem()!=0) return;
-                ((FoldersFragment)pageAdapter.getItem(0)).importFileFromUri(uri);
+                if(pager.getCurrentItem() == 0)
+                    ((FoldersFragment)pageAdapter.getItem(0)).utils.importFileFromUri(uri);
         }
     }
 
@@ -305,13 +305,14 @@ public class MainActivity extends AppCompatActivity implements InstallFragment.O
                                            String permissions[], int[] grantResults) {
         switch (requestCode) {
             case WRITE_EXT_STORAGE_REQUEST: {
+                //todo maybe permission not set yet when dialog returns
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     if (pager.getCurrentItem() == 0) {
                         FoldersFragment frag = (FoldersFragment) pageAdapter.fragments.get(0);
                         if(frag.pendingCopy != null) {
-                            frag.copyToSD(frag.pendingCopy);
+                            frag.utils.copyToSD(frag.pendingCopy);
                             frag.pendingCopy = null;
                         }
                     }
@@ -320,11 +321,6 @@ public class MainActivity extends AppCompatActivity implements InstallFragment.O
                 }
             }
         }
-    }
-
-    @Override
-    public void onFragmentInteraction(Uri uri) {
-        Log.d(GO, uri.toString());
     }
 
 

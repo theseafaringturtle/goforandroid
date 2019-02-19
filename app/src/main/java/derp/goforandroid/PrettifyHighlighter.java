@@ -6,8 +6,11 @@ package derp.goforandroid;
 
 import android.graphics.Color;
 import android.text.Editable;
+import android.text.Layout;
 import android.text.Spannable;
 import android.text.style.ForegroundColorSpan;
+import android.widget.EditText;
+import android.widget.ScrollView;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,11 +22,25 @@ import syntaxhighlight.Parser;
 
 public class PrettifyHighlighter {//http://stackoverflow.com/q/22124731
     Map<String, String> COLORS = buildColorsMap();
-    String FONT_PATTERN = "<font color=\"#%s\">%s</font>";
+    //String FONT_PATTERN = "<font color=\"#%s\">%s</font>";
     Parser parser = new PrettifyParser();
     static String syntaxHighlighting = "None";
+    Runnable highlightRunnable;
+    EditCode editor;
 
-    public String getHtmlHighlight(String fileExtension, String sourceCode) {
+    public PrettifyHighlighter(EditCode ed){
+        editor = ed;
+        highlightRunnable = new Runnable() {
+            @Override
+            public void run() {
+                editor.removeTextChangedListener(editor.watcher);
+                highlight();
+                editor.addTextChangedListener(editor.watcher);
+            }
+        };
+    }
+
+    /*public String getHtmlHighlight(String fileExtension, String sourceCode) {
         StringBuilder highlighted = new StringBuilder();
         List<ParseResult> results = parser.parse(fileExtension, sourceCode);
         for (ParseResult result : results) {
@@ -32,10 +49,28 @@ public class PrettifyHighlighter {//http://stackoverflow.com/q/22124731
             highlighted.append(String.format(FONT_PATTERN, getColor(type), content));
         }
         return highlighted.toString();
-    }
-    public void highlight(Editable s, String code){
+    }*/
+    public void highlight(){
+        Editable s = editor.getEditableText();
+        String code = editor.getText().toString();
+        /*ScrollView vertScrollView = (ScrollView)editor.getParent().getParent();
+        int height    = vertScrollView.getRootView().getHeight();//todo fix dynamic highlighting to account for keyboard height
+        int scrollY   = vertScrollView.getScrollY();
+        Layout layout = editor.getLayout();
+        if(layout == null)//view not initialised yet
+            return;*/
+        int firstIndex = 0;
+        int lastIndex = code.length();
+        /*int firstVisibleLineNumber = layout.getLineForVertical(scrollY);
+        int lastVisibleLineNumber  = layout.getLineForVertical(scrollY+height);
+        firstVisibleLineNumber = Math.max(firstVisibleLineNumber - 3, 0);
+        lastVisibleLineNumber = Math.min(lastVisibleLineNumber + 3, layout.getLineCount());
+        firstIndex = layout.getLineStart(firstVisibleLineNumber);
+        lastIndex = layout.getLineEnd(lastVisibleLineNumber);
+        code = code.substring(firstIndex,lastIndex);*/
+
         //s.clearSpans(); http://stackoverflow.com/a/10273449
-        ForegroundColorSpan[] toRemoveSpans = s.getSpans(0, s.toString().length(), ForegroundColorSpan.class);
+        ForegroundColorSpan[] toRemoveSpans = s.getSpans(firstIndex, lastIndex, ForegroundColorSpan.class);
         for (int i = 0; i < toRemoveSpans.length; i++)
             s.removeSpan(toRemoveSpans[i]);
         String hl = "go";
@@ -50,20 +85,11 @@ public class PrettifyHighlighter {//http://stackoverflow.com/q/22124731
             String type = result.getStyleKeys().get(0);
             s.setSpan(
                     new ForegroundColorSpan(Color.parseColor("#"+getColor(type))),
-                    result.getOffset(),
-                    result.getOffset() + result.getLength(),
+                    firstIndex + result.getOffset(),
+                    firstIndex + result.getOffset() + result.getLength(),
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
     }
-    /*
-    for (int i = str.indexOf(k); i >= 0; i = str.indexOf(k, i + 1)) {
-                            s.setSpan(
-                                    new ForegroundColorSpan(Color.MAGENTA),
-                                    i,
-                                    i + k.length(),
-                                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    }
-     */
 
     private String getColor(String type) {
         return COLORS.containsKey(type) ? COLORS.get(type) : COLORS.get("pln");

@@ -1,6 +1,7 @@
 package derp.goforandroid;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -26,6 +27,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.JGitInternalException;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -33,7 +38,9 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static android.os.Environment.MEDIA_BAD_REMOVAL;
 import static android.os.Environment.MEDIA_MOUNTED_READ_ONLY;
@@ -41,22 +48,7 @@ import static android.os.Environment.MEDIA_SHARED;
 import static android.os.Environment.MEDIA_UNMOUNTED;
 
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link FoldersFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link FoldersFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class FoldersFragment extends Fragment {
-    // TODO: not needed
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    private String mParam1;
-    private String mParam2;
 
     ListView listView;
 
@@ -74,8 +66,7 @@ public class FoldersFragment extends Fragment {
     CharSequence folderOptions[] = new CharSequence[] {"Rename","Delete","Share as zip"};
 
     String pendingCopy = null;
-
-    private OnFragmentInteractionListener mListener;
+    FolderUtils utils;
 
     public FoldersFragment() {
         // Required empty public constructor
@@ -93,40 +84,46 @@ public class FoldersFragment extends Fragment {
         activity.findViewById(R.id.newButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                chooseNew();
+                chooseNewDialog();
             }
         });
         activity.findViewById(R.id.importButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                importNew();
+                importNewDialog();
             }
         });
+        utils = new FolderUtils(activity,this);
         setRetainInstance(true);
     }
-    void importNew(){
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        String strType = "*/*";
-        intent.setDataAndType(Uri.parse(currentPath.getAbsolutePath()), strType);
-        activity.startActivityForResult(intent, 123);
-    }
-    void importFileFromUri(Uri uri){
-        String destPath = currentPath + File.separator + activity.getFileNameFromUri(uri);
-        try {
-            InputStream in = activity.getContentResolver().openInputStream(uri);
-            OutputStream out = new FileOutputStream(destPath);
-            Utils.copyFile(in, out);
-            updateFiles(currentPath);
-        }catch(Exception ex){
-            activity.showError("Could not import file",ex.toString(),false);
-            ex.printStackTrace();
+    void importNewDialog(){
+        if((currentPath.toString()+File.separator).equals(mDirs.srcDir)){
+            AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+            builder.setTitle("Import...");
+            String[] options = {"Import File","Clone Git Repository"};
+            DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if(which==0){
+                        utils.importNewFile();
+                    }
+                    else{
+                        utils.importRepoDialog();
+                    }
+                }
+            };
+            builder.setItems(options,listener);
+            builder.show();
         }
+        else{
+            utils.importNewFile();
+        }
+
     }
 
-    void chooseNew(){
+    void chooseNewDialog(){
         if((currentPath+File.separator).equals(mDirs.GOPATH))
             return;
-
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         builder.setTitle("Create...");
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
@@ -182,17 +179,6 @@ public class FoldersFragment extends Fragment {
             }
 
         });
-
-        /*listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view,
-                                    int position, long id) {
-                fileOrFolderActionDialog(position);
-                return true;
-            }
-        });*/
-
     }
     void fileOrFolderActionDialog(int position){
         final String item = (String)listView.getItemAtPosition(position);
@@ -229,7 +215,7 @@ public class FoldersFragment extends Fragment {
                 deleteFileDialog(new File(currentPath+File.separator+item));
                 break;
             case 2://share
-                shareFolder(item);
+                utils.shareFolder(item);
                 break;
         }
     }
@@ -247,45 +233,11 @@ public class FoldersFragment extends Fragment {
                 deleteFileDialog(new File(currentPath+File.separator+item));
                 break;
             case 2://share
-                shareFile(new File(currentPath+File.separator+item));
+                utils.shareFile(new File(currentPath+File.separator+item));
                 break;
             case 3://copy to sd
-                copyToSD(item);
+                utils.copyToSD(item);
                 break;
-        }
-    }
-    void runFile(String name){
-        getEditFragment().startBuild(name);
-    }
-    void shareFolder(String item){
-        File source = new File(currentPath+File.separator+item);
-        File dest = new File(mDirs.filesDir+"Go_"+item+"_shared.zip");
-        if(dest.exists())
-            dest.delete();
-        try {
-            Utils.zip(source, dest);
-        }
-        catch(Exception ex){
-            activity.showError("Could not share folder","Folder compression failed",false);
-            ex.printStackTrace();
-        }
-        if(dest.exists()){
-            shareFile(dest);
-        }
-    }
-
-    void shareFile(final File fileToShare){
-        //http://stackoverflow.com/a/28874567
-        Uri contentUri = FileProvider.getUriForFile(activity, "derp.goforandroid.fileprovider", fileToShare);
-        Intent mailIntent = new Intent(Intent.ACTION_SEND);
-        mailIntent.setType("message/rfc822");
-        //mailIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
-        //mailIntent.putExtra(Intent.EXTRA_TEXT, body);
-        mailIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
-        try {
-            startActivity(Intent.createChooser(mailIntent, "Share File"));
-        } catch (android.content.ActivityNotFoundException ex) {
-            Toast.makeText(activity, "Could not contact provider", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -310,52 +262,6 @@ public class FoldersFragment extends Fragment {
                 .show();
     }
 
-    void copyToSD(String item){
-        if(!mDirs.externalStorageAvailable()){
-            switch(Environment.getExternalStorageState()){
-                case(MEDIA_SHARED):
-                    activity.showError("Could not copy to SD card","SD card is inaccessible when shared via USB mass Storage Mode",false);
-                    break;
-                case(MEDIA_UNMOUNTED):
-                    activity.showError("Could not copy to SD card","SD card is not mounted",false);
-                    break;
-                case(MEDIA_BAD_REMOVAL):
-                    activity.showError("Could not copy to SD card","SD card is not mounted",false);
-                    break;
-                case(MEDIA_MOUNTED_READ_ONLY):
-                    activity.showError("Could not copy to SD card","SD card is read only",false);
-                    break;
-                default:
-                    activity.showError("Could not copy to SD card","SD card is not available",false);
-            }
-            return;
-        }
-        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED){
-            //Toast.makeText(activity,"You need to grant permission to copy files to the SD Card",Toast.LENGTH_LONG).show();
-            activity.requestSDPermission();
-            pendingCopy = item;
-            return;
-        }
-        String sdPath = Environment.getExternalStorageDirectory()+File.separator+"Go"+File.separator;
-        String relPath = mDirs.getRelativePath(currentPath.getAbsolutePath());
-        String newPath = sdPath+relPath;
-        if(new File(newPath).mkdirs() || new File(newPath).exists()){
-            try {
-                InputStream in = new FileInputStream(new File(currentPath + File.separator + item));
-                OutputStream out = new FileOutputStream(new File(newPath + File.separator + item));
-                Utils.copyFile(in, out);
-                Toast.makeText(activity,"File copied to: "+newPath,Toast.LENGTH_LONG).show();
-            }
-            catch(Exception ex){
-                activity.showError("Could not copy to SD Card","Failed to copy file",false);
-                ex.printStackTrace();
-            }
-        }
-        else{
-            activity.showError("Could not copy to SD Card","Failed to create directories",false);
-        }
-    }
     void renameFile(String oldName, String name){
         String oldPath = currentPath+File.separator+oldName;
         String newPath = currentPath+File.separator+name;
@@ -504,7 +410,7 @@ public class FoldersFragment extends Fragment {
         }
     }
 
-    private void deleteRecursive(File fileOrDirectory) {//http://stackoverflow.com/a/6425744
+    void deleteRecursive(File fileOrDirectory) {//http://stackoverflow.com/a/6425744
         if (fileOrDirectory.isDirectory())
             for (File child : fileOrDirectory.listFiles())
                 deleteRecursive(child);
@@ -545,10 +451,10 @@ public class FoldersFragment extends Fragment {
             if (!(path.getParentFile().getAbsolutePath()+File.separator).equals(mDirs.filesDir)) {
                 r.add("..");
                 if(!path.toString().startsWith(mDirs.binDir.substring(0,mDirs.binDir.length()-1)))
-                    activity.findViewById(R.id.newButton).setVisibility(View.VISIBLE);
+                    activity.findViewById(R.id.newButton).setEnabled(true);
             }
             else{
-                activity.findViewById(R.id.newButton).setVisibility(View.INVISIBLE);
+                activity.findViewById(R.id.newButton).setEnabled(false);
             }
             //list directories before files
             FilenameFilter filefilter = new FilenameFilter() {
@@ -587,11 +493,9 @@ public class FoldersFragment extends Fragment {
         ((TabLayout)activity.findViewById(R.id.sliding_tabs)).getTabAt(1).select();
     }
 
-    public static FoldersFragment newInstance(String param1, String param2) {
+    public static FoldersFragment newInstance() {
         FoldersFragment fragment = new FoldersFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -599,10 +503,6 @@ public class FoldersFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
@@ -614,40 +514,13 @@ public class FoldersFragment extends Fragment {
 
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
     }
     @Override
     public void onStop(){
         super.onStop();
         activity.currentFolderPath = this.currentPath.toString();
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
     }
 }
 

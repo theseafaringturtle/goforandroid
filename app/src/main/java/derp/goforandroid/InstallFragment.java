@@ -56,7 +56,6 @@ public class InstallFragment extends Fragment {
 
     MainActivity activity = null;
 
-    private OnFragmentInteractionListener mListener;
 
     public InstallFragment() {
         // Required empty public constructor
@@ -120,8 +119,10 @@ public class InstallFragment extends Fragment {
 
     private void extractFiles(){
         String tarName = "go-linux-arm.zip";
-        ((ProgressBar)getView().findViewById(R.id.progressBar)).setMax(62999413);//75740109
+        ((ProgressBar)getView().findViewById(R.id.progressBar)).setMax(71809293);//75740109
         final boolean success = Decompress.unzipFromAssets(this,tarName,mDirs.filesDir) && mDirs.checkFiles();
+
+        //Decompress.unzipFromAssets(this,"android-gcc-4.4.0.zip",mDirs.filesDir);
         getActivity().runOnUiThread( new  Runnable(){
             @Override
             public void run(){
@@ -148,23 +149,29 @@ public class InstallFragment extends Fragment {
         mDirs.binDir = mDirs.GOPATH+"bin"+File.separator;
     }*/
 
+    //and set permissions
     private void createOtherPaths() throws IOException {
         new File(mDirs.filesDir).setWritable(true, false);
         new File(mDirs.filesDir).setReadable(true, false);
             File g = new File(mDirs.GOPATH);
             if (!g.exists()) {
-                if (g.mkdir()) {
-                    if (new File(mDirs.srcDir + "welcome").mkdirs()) {
-                        InputStream in = activity.getAssets().open("welcome.go");
-                        OutputStream out = new FileOutputStream(new File(mDirs.srcDir + "welcome" + File.separator + "welcome.go"));
-                        Utils.copyFile(in, out);
-                    }
-                    if (new File(mDirs.binDir).mkdirs()) {
-                        InputStream in = activity.getAssets().open("gocode");//autocompletion
-                        OutputStream out = new FileOutputStream(new File(mDirs.binDir+"gocode"));
-                        Utils.copyFile(in, out);
-                        new File(mDirs.binDir+"gocode").setExecutable(true, false);
-                    }
+                g.mkdir();
+                new File(mDirs.pkgDir).mkdir();
+                if (new File(mDirs.srcDir + "welcome").mkdirs()) {
+                    InputStream in = activity.getAssets().open("welcome.go");
+                    OutputStream out = new FileOutputStream(new File(mDirs.srcDir + "welcome" + File.separator + "welcome.go"));
+                    Utils.copyFile(in, out);
+                }
+                if (new File(mDirs.srcDir + "httpClient").mkdirs()) {
+                    InputStream in = activity.getAssets().open("httpClient.go");
+                    OutputStream out = new FileOutputStream(new File(mDirs.srcDir + "httpClient" + File.separator + "httpClient.go"));
+                    Utils.copyFile(in, out);
+                }
+                if (new File(mDirs.binDir).mkdirs()) {
+                    InputStream in = activity.getAssets().open("gocode");//autocompletion
+                    OutputStream out = new FileOutputStream(new File(mDirs.binDir+"gocode"));
+                    Utils.copyFile(in, out);
+                    new File(mDirs.binDir+"gocode").setExecutable(true, false);
                 }
             }
             new File(mDirs.goExePath + "go").setExecutable(true);
@@ -174,16 +181,13 @@ public class InstallFragment extends Fragment {
 
             new File(mDirs.goToolsDir + "compile").setExecutable(true, false);
             new File(mDirs.goToolsDir + "link").setExecutable(true, false);
-            //new File(mDirs.goToolsDir + "cgo").setExecutable(true, false);
+            new File(mDirs.goToolsDir + "asm").setExecutable(true, false);
+        //new File(mDirs.goToolsDir + "cgo").setExecutable(true, false);
             String tmpPath = mDirs.filesDir + "tmp";
             new File(tmpPath).mkdir();
             new File(tmpPath).setWritable(true, false);
-            if (new File(mDirs.goExePath + "tmppath.txt").createNewFile()) {
-                FileOutputStream out = new FileOutputStream(mDirs.goExePath + "tmppath.txt");
-                String content = tmpPath; //filesDir+File.separator+"tmp";
-                out.write(content.getBytes());
-                out.close();
-            }
+
+            new File(mDirs.goToolsDir + "cgo").setExecutable(true, false);
     }
     private void firstBuild(){
         try{
@@ -200,7 +204,7 @@ public class InstallFragment extends Fragment {
             envVars.put("GOROOT",mDirs.GOROOT);
             envVars.put("GOPATH",mDirs.GOPATH);
             envVars.put("TMPDIR",mDirs.filesDir+"tmp");
-            envVars.put("CGO_ENABLED","0");
+            envVars.put("CGO_ENABLED","1");//todo android toolchain for cgo
             String wDir = mDirs.goExePath;
             final String out = Utils.executeCommand(command,envVars,wDir);
             if(out.length()<8){
@@ -259,27 +263,10 @@ public class InstallFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_install, container, false);
     }
 
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
     }
 
     /**

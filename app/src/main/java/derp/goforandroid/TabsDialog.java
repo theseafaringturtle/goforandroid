@@ -100,7 +100,7 @@ public class TabsDialog {
             public void run() {
                 fragment.inView.addTextChangedListener(fragment.inView.watcher);
                 fragment.inView.padLineNums();
-                fragment.inView.highlighter.highlight(fragment.inView.getEditableText(),fragment.inView.getText().toString());
+                fragment.inView.highlighter.highlight();
                 fragment.inView.historyClear();
             }
         });

@@ -50,10 +50,6 @@ public class EditFragment extends Fragment {
 
     private static final String EXAMPLE = "example";
 
-    private boolean isExample;
-    private boolean firstTime = true;
-
-
     static String currentPath = "";
 
     static int fontSize = 18;
@@ -67,7 +63,6 @@ public class EditFragment extends Fragment {
     static Thread buildThread;
     static boolean noTabs = true;
 
-    private OnFragmentInteractionListener mListener;
 
     public EditFragment() {
         // Required empty public constructor
@@ -210,6 +205,7 @@ public class EditFragment extends Fragment {
                 tabsDialog.show();
             }
         });
+        ScrollViewEdit.highlighter = inView.highlighter;
     }
 
     public void startBuild(final String packageName){
@@ -243,6 +239,7 @@ public class EditFragment extends Fragment {
         String[] command = {
                 mDirs.goExePath+"go",
                 "install",
+                "-ldflags=\"-extldflags=-pie\"",//todo android toolchain for cgo
                 packageName
         };
         HashMap<String,String> envVars = new HashMap<>();
@@ -250,6 +247,9 @@ public class EditFragment extends Fragment {
         envVars.put("GOPATH",mDirs.GOPATH);
         envVars.put("TMPDIR",mDirs.filesDir+"tmp");
         envVars.put("CGO_ENABLED","0");
+        //envVars.put("CC",mDirs.filesDir+"android-gcc-4.4.0/bin/arm-eabi-gcc");
+        //envVars.put("CXX",mDirs.filesDir+"android-gcc-4.4.0/bin/arm-eabi-g++");
+
         String wDir = mDirs.goExePath;
         final String out = Utils.executeCommand(command,envVars,wDir);
 
@@ -279,41 +279,23 @@ public class EditFragment extends Fragment {
     }
 
     public void runCode(String packageName) throws IOException{
-        String[] command = {
-                mDirs.binDir+packageName
-        };
+        ArrayList command = new ArrayList<String>();
         HashMap<String,String> envVars = new HashMap<>();
         envVars.put("TMPDIR",mDirs.filesDir+"tmp");
-        String wDir = mDirs.binDir;
+        String wDir = mDirs.srcDir+mDirs.getPackageName(currentPath);
         //don't clutter user bin directory with example bins
         if(mDirs.getPackageName(currentPath).startsWith("examples")){
             if(!new File(mDirs.binDir+"examples").exists())
                 new File(mDirs.binDir+"examples").mkdir();
             new File(mDirs.binDir+packageName).renameTo(new File(mDirs.binDir+"examples"+File.separator+packageName));//move bin to examples subdir
-            command[0]=mDirs.binDir+"examples"+File.separator+packageName;
+            command.add(mDirs.binDir+"examples"+File.separator+packageName);
         }
-        else{//test
+        else{
             if(!new File(mDirs.binDir+"_"+packageName+File.separator).exists())//underscore?
                 new File(mDirs.binDir+"_"+packageName+File.separator).mkdir();
             if(new File(mDirs.binDir+packageName).renameTo(new File(mDirs.binDir+"_"+packageName+File.separator+packageName)))
-                command[0] = mDirs.binDir + "_" + packageName + File.separator + packageName;
+                command.add(mDirs.binDir + "_" + packageName + File.separator + packageName);
         }
-        /*
-        if(mDirs.getPackageName(currentPath).startsWith("examples")){
-            if(!new File(mDirs.binDir+"examples").exists())
-                new File(mDirs.binDir+"examples").mkdir();
-            if(!new File(mDirs.binDir+"examples"+File.separator+packageName).exists())
-                new File(mDirs.binDir+"examples"+File.separator+packageName).mkdir();
-            if(new File(mDirs.binDir+packageName).renameTo(new File(mDirs.binDir+"examples"+File.separator+packageName+File.separator+packageName)))//move bin to examples subdir
-                command[0]=mDirs.binDir+"examples"+File.separator+packageName;
-        }
-        else{//test
-            if(!new File(mDirs.binDir+"_"+packageName+File.separator).exists())//underscore?
-                new File(mDirs.binDir+"_"+packageName+File.separator).mkdir();
-            if(new File(mDirs.binDir+packageName).renameTo(new File(mDirs.binDir+"_"+packageName+File.separator+packageName)))
-                command[0] = mDirs.binDir + "_" + packageName + File.separator + packageName;
-        }f
-        */
         ConsoleFragment con = getConsoleFragment();
         con.stopProcess();
         con.activity=activity;
@@ -440,7 +422,7 @@ public class EditFragment extends Fragment {
             @Override
             public void run() {
                 inView.padLineNums();
-                inView.highlighter.highlight(inView.getEditableText(), inView.getText().toString());
+                inView.highlighter.highlight();
                 if(!path.equals(currentPath))//reloading current file?
                     inView.historyClear();
                 inView.addTextChangedListener(inView.watcher);
@@ -477,7 +459,7 @@ public class EditFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            isExample = getArguments().getBoolean(EXAMPLE);
+            //isExample = getArguments().getBoolean(EXAMPLE);
         }
     }
 
@@ -489,16 +471,6 @@ public class EditFragment extends Fragment {
     }
 
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
     @Override
     public void onStop(){
         super.onStop();
@@ -517,13 +489,12 @@ public class EditFragment extends Fragment {
         else
             inView.curLinePaint.setColor(Color.parseColor("#3E197AE9"));
         inView.padLineNums();
-        inView.highlighter.highlight(inView.getEditableText(),inView.getText().toString());
+        inView.highlighter.highlight();
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
     }
     
     public interface OnFragmentInteractionListener {

@@ -75,22 +75,32 @@
 
         </RelativeLayout>
 
-        <derp.goforandroid.EditCode
-            android:id="@+id/inputView"
+        <derp.goforandroid.ScrollViewEdit
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_above="@+id/keyButtonRowScroller"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_below="@+id/editCmdBar"
             android:gravity="top|left"
-            android:hint=""
-            android:inputType="textMultiLine|textNoSuggestions"
-            android:scrollbarStyle="insideOverlay"
-            android:scrollbars="vertical"
-            android:textSize="16sp"
-            app:backgroundTint="#00000000" />
-
+            android:fillViewport="true"
+            >
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            <derp.goforandroid.EditCode
+                android:id="@+id/inputView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="top|left"
+                android:hint=""
+                android:inputType="textMultiLine|textNoSuggestions"
+                android:scrollbarStyle="insideOverlay"
+                android:scrollbars="vertical"
+                android:textSize="16sp"
+                app:backgroundTint="#00000000" />
+            </HorizontalScrollView>
+        </derp.goforandroid.ScrollViewEdit>
 
         <HorizontalScrollView
             android:id="@+id/keyButtonRowScroller"
