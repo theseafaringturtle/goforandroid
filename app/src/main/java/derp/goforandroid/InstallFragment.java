@@ -119,7 +119,7 @@ public class InstallFragment extends Fragment {
 
     private void extractFiles(){
         String tarName = "go-linux-arm.zip";
-        ((ProgressBar)getView().findViewById(R.id.progressBar)).setMax(71809293);//75740109
+        ((ProgressBar)getView().findViewById(R.id.progressBar)).setMax(116557824);//TODO get file size
         final boolean success = Decompress.unzipFromAssets(this,tarName,mDirs.filesDir) && mDirs.checkFiles();
 
         //Decompress.unzipFromAssets(this,"android-gcc-4.4.0.zip",mDirs.filesDir);
@@ -203,8 +203,9 @@ public class InstallFragment extends Fragment {
             HashMap<String,String> envVars = new HashMap<>();
             envVars.put("GOROOT",mDirs.GOROOT);
             envVars.put("GOPATH",mDirs.GOPATH);
+            envVars.put("GOCACHE",mDirs.cacheDir);
             envVars.put("TMPDIR",mDirs.filesDir+"tmp");
-            envVars.put("CGO_ENABLED","1");//todo android toolchain for cgo
+            envVars.put("CGO_ENABLED","0");//todo android toolchain for cgo
             String wDir = mDirs.goExePath;
             final String out = Utils.executeCommand(command,envVars,wDir);
             if(out.length()<8){
@@ -219,14 +220,14 @@ public class InstallFragment extends Fragment {
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        ((MainActivity)activity).showError("Build Failed",out,true);
+                        ((MainActivity)activity).showError("Build Failed, Exiting",out,true);
                     }
                 });
             }
         }
         catch(Exception ex){
             ex.printStackTrace();
-            ((MainActivity)activity).showError("Build Failed",ex.toString(),true);
+            ((MainActivity)activity).showError("Build Failed, Exiting",ex.toString(),true);
         }
     }
     private void setupExamples(){//todo examples

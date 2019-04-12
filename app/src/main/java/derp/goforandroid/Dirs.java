@@ -24,6 +24,7 @@ public class Dirs {
     String srcDir;
     String pkgDir;
     String binDir;
+    String cacheDir;
     //String SETTINGS = "GoSettings";
 
     String compFolder = "go-linux-arm";
@@ -45,6 +46,7 @@ public class Dirs {
         srcDir = GOPATH+"src"+File.separator;
         pkgDir = GOPATH+"pkg"+File.separator+"linux_arm"+File.separator;
         binDir = GOPATH+"bin"+File.separator;
+        cacheDir = GOPATH+"cache"+File.separator;
     }
 
     public boolean checkFiles(){

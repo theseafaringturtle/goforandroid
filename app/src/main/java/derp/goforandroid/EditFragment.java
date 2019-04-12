@@ -245,6 +245,7 @@ public class EditFragment extends Fragment {
         HashMap<String,String> envVars = new HashMap<>();
         envVars.put("GOROOT",mDirs.GOROOT);
         envVars.put("GOPATH",mDirs.GOPATH);
+        envVars.put("GOCACHE",mDirs.cacheDir);
         envVars.put("TMPDIR",mDirs.filesDir+"tmp");
         envVars.put("CGO_ENABLED","0");
         //envVars.put("CC",mDirs.filesDir+"android-gcc-4.4.0/bin/arm-eabi-gcc");
