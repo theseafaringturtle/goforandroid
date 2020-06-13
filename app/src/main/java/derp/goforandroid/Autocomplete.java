@@ -71,7 +71,6 @@ public class Autocomplete {
         try {
             String[] command = {
                     mDirs.binDir + "gocode",
-                    //"-s",
                     "-f=" + outFormat,
                     "--in=" + mDirs.filesDir + "autocomplete.go",
                     "autocomplete",

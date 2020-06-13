@@ -94,7 +94,9 @@ public class InstallFragment extends Fragment {
 
 
     void stepProgress(int count){
-        ((ProgressBar)getView().findViewById(R.id.progressBar)).setProgress(((ProgressBar)getView().findViewById(R.id.progressBar)).getProgress()+count);
+        if(getView() != null) {
+            ((ProgressBar) getView().findViewById(R.id.progressBar)).setProgress(((ProgressBar) getView().findViewById(R.id.progressBar)).getProgress() + count);
+        }
     }
     public void extractionResult(boolean success){
         if(!success) {

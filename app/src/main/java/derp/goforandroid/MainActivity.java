@@ -267,6 +267,12 @@ public class MainActivity extends AppCompatActivity {
         File ac = new File(mDirs.filesDir + "autocomplete.go");
         if (ac.exists())
             ac.delete();
+        File tmp = new File(mDirs.filesDir+"tmp");
+        if(!tmp.exists())
+            return;
+        for(String path: new File(mDirs.filesDir+"tmp").list()){
+            new File(tmp.getAbsolutePath()+path).delete();
+        }
     }
 
     void showError(String title, String msg, final boolean fatal) {
